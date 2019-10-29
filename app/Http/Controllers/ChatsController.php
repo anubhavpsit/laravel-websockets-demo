@@ -25,6 +25,7 @@ class ChatsController extends Controller
 
     public function sendMessage(Request $request)
     {
+        \Log::info("Came in sendMessage");
         $message = auth()->user()->messages()->create([
             'message' => $request->message
         ]);
