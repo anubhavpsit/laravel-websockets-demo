@@ -16,3 +16,8 @@ Auth::routes();
 Route::get('/', 'ChatsController@index');
 Route::get('messages', 'ChatsController@fetchMessages');
 Route::post('messages', 'ChatsController@sendMessage');
+
+
+Route::get('group', 'GroupChatsController@index');
+Route::get('group/messages', 'GroupChatsController@fetchMessages');
+Route::post('group/messages', 'GroupChatsController@sendMessage');

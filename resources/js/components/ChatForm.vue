@@ -14,6 +14,9 @@
             <button class="btn btn-primary btn-sm" id="btn-chat" @click="sendMessage">
                 Send
             </button>
+            <button class="btn btn-primary btn-sm" id="btn-chat" @click="sendFile">
+                Attach
+            </button>
         </span>
     </div>
 </template>
@@ -41,6 +44,10 @@
                 });
 
                 this.newMessage = ''
+            }
+
+            sendFile() {
+                console.dir("Attache File Event Called");
             }
         }
     }
