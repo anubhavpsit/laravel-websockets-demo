@@ -21,3 +21,4 @@ Route::post('messages', 'ChatsController@sendMessage');
 Route::get('group', 'GroupChatsController@index');
 Route::get('group/messages', 'GroupChatsController@fetchMessages');
 Route::post('group/messages', 'GroupChatsController@sendMessage');
+Route::post('group/sendFile', 'GroupChatsController@sendFile');

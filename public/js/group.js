@@ -55,16 +55,19 @@ $(document).ready(function(){
             currentLiveUsers = this.users;
         })
         .listenForWhisper('typing', ({id, name}) => {
-            this.users.forEach((user, index) => {
-                if (user.id === id) {
-                    user.typing = true;
-                    this.$set(this.users, index, user);
-                }
-            });
+            $(".user_li_"+id).find('.is_typing').css("display", "inline-block");
+            // this.users.forEach((user, index) => {
+            //     if (user.id === id) {
+            //         user.typing = true;
+            //         this.$set(this.users, index, user);
+            //     }
+            // });
         })
         .listen('MessageSent', (event) => {
             var a = {
                created_at: event.message.created_at,
+               file_path: event.message.file_path,
+               file_type: event.message.file_type,
                id: event.message.id,
                message: event.message.message,
                message_type: event.message.message_type,
@@ -76,17 +79,18 @@ $(document).ready(function(){
             currentGroupMessages.push(a);
             //console.dir(event);
             chatMessagesListUiRow(a);
+            $(".user_li_"+a.user_id).find('.is_typing').css("display", "none");
             // this.messages.push({
             //     message: event.message.message,
             //     user: event.user
             // });
 
-            this.users.forEach((user, index) => {
-                if (user.id === event.user.id) {
-                    user.typing = false;
-                    this.$set(this.users, index, user);
-                }
-            });
+            // this.users.forEach((user, index) => {
+            //     if (user.id === event.user.id) {
+            //         user.typing = false;
+            //         this.$set(this.users, index, user);
+            //     }
+            // });
         });
 
 
@@ -98,10 +102,15 @@ function chatUsersUi(users) {
     if(users.length) {
         var userlistHtml = "<ul class='list-group'>";
         for(var i=0;i<users.length;i++) {
-            userlistHtml += "<li  class='list-group-item' data-user-id='"+users[i].id+"' data-user-email='"+users[i].email+"'>";
+            if($("#currentGroupMessages").data('user-id') == users[i].id) {
+                userlistHtml += "<li class='list-group-item active user_li_"+users[i].id+"' data-user-id='"+users[i].id+"' data-user-email='"+users[i].email+"'>";
+            } else {
+                userlistHtml += "<li class='list-group-item user_li_"+users[i].id+"' data-user-id='"+users[i].id+"' data-user-email='"+users[i].email+"'>";                
+            }
             userlistHtml += users[i].name;
+            userlistHtml += "<span class='badge badge-success is_typing' style='display:none;'>typing...</span>";
             userlistHtml += "</li>";
-        }        
+        }
         userlistHtml += "</ul>";
         $("#currentOnlineUsers").html(userlistHtml);
     } else {
@@ -110,10 +119,13 @@ function chatUsersUi(users) {
 }
 
 function chatMessagesListUi(messages) {
-
     if(messages.length) {
         var groupMessagesHtml = "<ul class='chat'>";
         for(var i=0;i<messages.length;i++) {
+            var messageText = messages[i].message;
+            if(messages[i].message_type == 1) {
+                messageText = '<a href="/storage/chats/'+messages[i].file_path+'">'+messages[i].message+'</a>';
+            }
             groupMessagesHtml += "<li class='left clearfix'>";
             groupMessagesHtml += "<div class='chat-body clearfix'>";
             groupMessagesHtml += "<div class='header'>";
@@ -122,7 +134,7 @@ function chatMessagesListUi(messages) {
             groupMessagesHtml += "</strong>";
             groupMessagesHtml += "</div>";
             groupMessagesHtml += "<p>";
-            groupMessagesHtml += messages[i].message;
+            groupMessagesHtml += messageText;
             groupMessagesHtml += "</p>";
             groupMessagesHtml += "</div>";
             groupMessagesHtml += "</li>";
@@ -135,7 +147,10 @@ function chatMessagesListUi(messages) {
 }
 
 function chatMessagesListUiRow(message) {
-    console.dir(message);
+    var messageText = message.message;
+    if(message.message_type == 1) {
+        messageText = '<a href="/storage/chats/'+message.file_path+'">'+message.message+'</a>';
+    }
     var groupMessagesHtml = "<li class='left clearfix'>";
     groupMessagesHtml += "<div class='chat-body clearfix'>";
     groupMessagesHtml += "<div class='header'>";
@@ -144,7 +159,7 @@ function chatMessagesListUiRow(message) {
     groupMessagesHtml += "</strong>";
     groupMessagesHtml += "</div>";
     groupMessagesHtml += "<p>";
-    groupMessagesHtml += message.message;
+    groupMessagesHtml += messageText;
     groupMessagesHtml += "</p>";
     groupMessagesHtml += "</div>";
     groupMessagesHtml += "</li>";
@@ -169,6 +184,54 @@ function getMessages() {
     console.dir(reject);
    }
   })  
+}
+
+function openFileBrowser(ele) {
+    $("#uploadFile").click();
+}
+
+function sendFileAttach(ele) {
+
+    var formdata = new FormData();
+    formdata.append('files', ele.files[0]);
+    formdata.append('message_type', 1);
+    formdata.append('user', JSON.stringify(getCurrentUserData($("#currentGroupMessages").data("user-id"))));
+
+    var url = '/group/sendFile';
+    $.ajax({
+        url: url,
+        type: "POST",
+        data:  formdata,
+        contentType: false,
+        processData:false,
+        async: false,
+        headers: {
+        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        beforeSend : function()
+        {
+        },
+        success: function(response)
+        {
+            //console.dir(response);
+            var a = {
+               created_at: response.data.message.created_at,
+               id: response.data.message.id,
+               message: response.data.message.message,
+               message_type: response.data.message.message_type,
+               file_path: response.data.message.file_path,
+               file_type: response.data.message.file_type,
+               updated_at: response.data.message.updated_at,
+               user: response.data.user,
+               user_id: response.data.message.user_id
+            }
+            chatMessagesListUiRow(a);
+        },
+        error: function(e) 
+        {
+            $("#err").html(e).fadeIn();
+        }
+    });
 }
 
 function sendMessage(ele) {
@@ -196,6 +259,7 @@ function sendMessage(ele) {
         success:function(response)
         {
         //console.dir(response);
+        $("#btn-input").val('');
         var a = {
            created_at: response.data.message.created_at,
            id: response.data.message.id,
@@ -212,4 +276,12 @@ function sendMessage(ele) {
         console.dir(reject);
         }
     })
+}
+
+function sendTypingEvent(userId) {
+    Echo.join('chat').whisper('typing', getCurrentUserData(userId));
+}
+
+function getCurrentUserData(userId) {
+    return currentLiveUsers.find(x => x.id === userId);
 }

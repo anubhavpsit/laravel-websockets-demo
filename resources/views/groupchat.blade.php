@@ -37,20 +37,23 @@
                 <div class="card card-default">
                     <div class="card-header">Chats</div>
 
-                    <div class="card-body" id="currentGroupMessages">
+                    <div class="card-body" id="currentGroupMessages" data-user-id="{{Auth::id()}}">
                         
                     </div>
                     <div class="card-footer">
 
                         <div class="input-group">
-                            <input id="btn-input" type="text" name="message" class="form-control input-sm" placeholder="Type your message here..." />
+                            <input id="btn-input" type="text" name="message" onkeyup="sendTypingEvent({{Auth::id()}})" class="form-control input-sm" placeholder="Type your message here..." />
                             <span class="input-group-btn" data-user-id="{{Auth::id()}}">
                                 <button class="btn btn-primary btn-sm" id="btn-send-message" onClick="sendMessage(this)">
                                     Send
                                 </button>
-                                <button class="btn btn-primary btn-sm" id="btn-send-file" onClick="sendFile(this)">
+                                <button class="btn btn-primary btn-sm" id="btn-send-file" onClick="openFileBrowser(this)">
                                     Attach
                                 </button>
+                                <input type="file" style="display: none;" id="uploadFile" accept=
+"application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint,
+text/plain, application/pdf, image/*" onchange="sendFileAttach(this)">
                             </span>
                         </div>
 

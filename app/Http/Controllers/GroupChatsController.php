@@ -34,4 +34,31 @@ class GroupChatsController extends Controller
 
         return ['status' => 'Message Sent!', 'data' => ['user' => auth()->user(), 'message' => $message]];
     }
+
+    public function sendFile(Request $request)
+    {
+        \Log::info("Came in sendFile");
+        $fileType = $request->file('files')->getMimeType();
+        $displayName = $request->file('files')->getClientOriginalName();
+        $message = auth()->user()->messages()->create([
+            'message' => $displayName,
+            'message_type' => $request->message_type,
+            'aaaa' => 'ad'
+        ]);
+
+        $messageId = $message->id;
+
+        $userData = json_decode($request->user);
+        $userId = $userData->id;
+        $imageName = $userId."_".$messageId."_chat".time().".".$request->file('files')->getClientOriginalExtension();
+        $imagePath = "public/chats/";
+        \Storage::putFileAs($imagePath, $request->file('files'), $imageName);
+        $fileMessage = new Message();
+        $fileMessage->updatedFileInfo($messageId, ['file_path' => $imageName, 'file_type' => $fileType]);
+
+        $messageData = Message::find(['id' => $messageId])->first();
+        \Log::info(json_encode($messageData));
+        broadcast(new MessageSent(auth()->user(), $messageData))->toOthers();
+        return ['status' => 'Message Sent!', 'data' => ['user' => auth()->user(), 'message' => $messageData]];
+    }
 }
