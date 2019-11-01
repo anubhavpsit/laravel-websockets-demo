@@ -32,6 +32,6 @@ class GroupChatsController extends Controller
 
 		broadcast(new MessageSent(auth()->user(), $message))->toOthers();
 
-        return ['status' => 'Message Sent!'];
+        return ['status' => 'Message Sent!', 'data' => ['user' => auth()->user(), 'message' => $message]];
     }
 }

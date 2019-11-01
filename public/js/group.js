@@ -72,8 +72,10 @@ $(document).ready(function(){
                user: event.user,
                user_id: event.message.user_id
             }
+            //console.dir(a);
             currentGroupMessages.push(a);
-            chatMessagesListUiRow(event);
+            //console.dir(event);
+            chatMessagesListUiRow(a);
             // this.messages.push({
             //     message: event.message.message,
             //     user: event.user
@@ -133,6 +135,7 @@ function chatMessagesListUi(messages) {
 }
 
 function chatMessagesListUiRow(message) {
+    console.dir(message);
     var groupMessagesHtml = "<li class='left clearfix'>";
     groupMessagesHtml += "<div class='chat-body clearfix'>";
     groupMessagesHtml += "<div class='header'>";
@@ -141,7 +144,7 @@ function chatMessagesListUiRow(message) {
     groupMessagesHtml += "</strong>";
     groupMessagesHtml += "</div>";
     groupMessagesHtml += "<p>";
-    groupMessagesHtml += message.message.message;
+    groupMessagesHtml += message.message;
     groupMessagesHtml += "</p>";
     groupMessagesHtml += "</div>";
     groupMessagesHtml += "</li>";
@@ -172,52 +175,41 @@ function sendMessage(ele) {
     sendBy = $(ele).parent().data('user-id');
     var user = currentLiveUsers.find(x => x.id === sendBy);
     var newMessage = $("#btn-input").val();
+    var messageType = 0;
     var mData = {
         user: user,
         message: newMessage
     };
-    // Echo.join('chat').emit('messagesent', {
-    //     user: user,
-    //     message: newMessage
-    // });
-    // console.dir(window.Echo.connector.socket);
-    // console.dir(window.Echo.connector.socketId);
-    console.dir(mData);
-    //window.Echo.connector.socket.emit('messagesent', 'chat', mData);
 
-   // Echo.channel('presence-chat').emit('messagesent', mData);
+    //Echo.channel('presence-chat').emit('messagesent', mData);
     //Echo.connector.socketId.bind('messagesent', 'chat', mData);
-
-    // var url = 'http://localhost:8000/messages';
-    // $.post(url, {
-    //     _token: '{{ csrf_token() }}',
-    //     key: 'websocketkey',
-    //     secret: 'somethingsecret',
-    //     appId: 'testapp',
-    //     channel: 'presence-chat',
-    //     event: 'messagesent',
-    //     data: mData,
-    // }).fail(() => {
-    //     alert('Error sending event.');
-    // });
-
-
-  var url = '/group/messages';
-  $.ajax({
-   url:url,
-   method:"POST",
-   dataType:"JSON",
-   data: mData,
-   async: false,
-   headers: {
-     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-   },
-   success:function(data)
-   {
-    currentGroupMessages = data;
-   },
-   error:function (reject) {
-    console.dir(reject);
-   }
-  })
+    var url = '/group/messages';
+    $.ajax({
+        url:url,
+        method:"POST",
+        dataType:"JSON",
+        data: mData,
+        async: false,
+        headers: {
+        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        success:function(response)
+        {
+        //console.dir(response);
+        var a = {
+           created_at: response.data.message.created_at,
+           id: response.data.message.id,
+           message: response.data.message.message,
+           message_type: messageType,
+           updated_at: response.data.message.updated_at,
+           user: response.data.user,
+           user_id: response.data.message.user_id
+        }
+        //console.dir(a);
+        chatMessagesListUiRow(a);
+        },
+        error:function (reject) {
+        console.dir(reject);
+        }
+    })
 }
