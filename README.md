@@ -22,3 +22,9 @@ Be sure to check out the [official documentation](https://docs.beyondco.de/larav
 ## License
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+
+
+//Run by below cmd
+php artisan serve --host=192.200.12.96 --port=8000
+UPDATE PUSHER_APP_BROADCASTING_HOST in .env file
+UPDATE IN public js group.js wsHost: '127.0.0.1',
