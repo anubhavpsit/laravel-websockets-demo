@@ -145,9 +145,52 @@ function sendMessage(ele) {
     sendBy = $(ele).parent().data('user-id');
     var user = currentLiveUsers.find(x => x.id === sendBy);
     var newMessage = $("#btn-input").val();
-    Echo.emit('messagesent', {
+    var mData = {
         user: user,
         message: newMessage
-    });
+    };
+    // Echo.join('chat').emit('messagesent', {
+    //     user: user,
+    //     message: newMessage
+    // });
+    // console.dir(window.Echo.connector.socket);
+    // console.dir(window.Echo.connector.socketId);
+    console.dir(mData);
+    //window.Echo.connector.socket.emit('messagesent', 'chat', mData);
 
+   // Echo.channel('presence-chat').emit('messagesent', mData);
+    //Echo.connector.socketId.bind('messagesent', 'chat', mData);
+
+    // var url = 'http://localhost:8000/messages';
+    // $.post(url, {
+    //     _token: '{{ csrf_token() }}',
+    //     key: 'websocketkey',
+    //     secret: 'somethingsecret',
+    //     appId: 'testapp',
+    //     channel: 'presence-chat',
+    //     event: 'messagesent',
+    //     data: mData,
+    // }).fail(() => {
+    //     alert('Error sending event.');
+    // });
+
+
+  var url = '/group/messages';
+  $.ajax({
+   url:url,
+   method:"POST",
+   dataType:"JSON",
+   data: mData,
+   async: false,
+   headers: {
+     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+   },
+   success:function(data)
+   {
+    currentGroupMessages = data;
+   },
+   error:function (reject) {
+    console.dir(reject);
+   }
+  })
 }
