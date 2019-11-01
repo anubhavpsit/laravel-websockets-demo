@@ -63,10 +63,21 @@ $(document).ready(function(){
             });
         })
         .listen('MessageSent', (event) => {
-            this.messages.push({
-                message: event.message.message,
-                user: event.user
-            });
+            var a = {
+               created_at: event.message.created_at,
+               id: event.message.id,
+               message: event.message.message,
+               message_type: event.message.message_type,
+               updated_at: event.message.updated_at,
+               user: event.user,
+               user_id: event.message.user_id
+            }
+            currentGroupMessages.push(a);
+            chatMessagesListUiRow(event);
+            // this.messages.push({
+            //     message: event.message.message,
+            //     user: event.user
+            // });
 
             this.users.forEach((user, index) => {
                 if (user.id === event.user.id) {
@@ -119,6 +130,22 @@ function chatMessagesListUi(messages) {
     } else {
         $("#currentGroupMessages").html('');
     }
+}
+
+function chatMessagesListUiRow(message) {
+    var groupMessagesHtml = "<li class='left clearfix'>";
+    groupMessagesHtml += "<div class='chat-body clearfix'>";
+    groupMessagesHtml += "<div class='header'>";
+    groupMessagesHtml += "<strong class='primary-font'>";
+    groupMessagesHtml += message.user.name;
+    groupMessagesHtml += "</strong>";
+    groupMessagesHtml += "</div>";
+    groupMessagesHtml += "<p>";
+    groupMessagesHtml += message.message.message;
+    groupMessagesHtml += "</p>";
+    groupMessagesHtml += "</div>";
+    groupMessagesHtml += "</li>";
+    $("#currentGroupMessages").find('.chat').append(groupMessagesHtml);
 }
 
 function getMessages() {
